@@ -1,8 +1,9 @@
 l1 = 15.7-1.0;
 l2 = 16.2-1.0;
 w = 8.0;
-d = 5.2;
+d = 4.8;
 pin_dia = 4.0;
+pin_dia2 = 2.4;
 
 d1 = 0.4;
 d2 = 0.8;
@@ -15,6 +16,10 @@ corner_r = 1.5;
 cutout_r = 10;
 cutout_h = 10;
 cutout_d = d2 + 0.2;
+slit_w = 0.25;
+icon_w = 4.5;
+
+with_icon=true;
 
 $fa = 5;
 $fs = 0.1;
@@ -81,11 +86,64 @@ module base2d() {
   }
 }
 
-linear_extrude(height=d1) {
-  base2d();
+module lock_icon() {
+  translate([1.0, 0]) {
+    translate([-3.2,0]) {
+      difference() {
+        circle(r=.5*icon_w-0.2);
+        circle(r=.5*icon_w-0.6);
+        translate([.5*icon_w-0.6, 0]) {
+          square(size=[2, 10], center=true);
+        }
+      }
+    }
+    difference() {
+      offset(r=0.6) {
+        square(size=[5.2-2*0.6, icon_w-2*0.6], center=true);
+      }
+      offset(r=0.4) {
+        square(size=[5.2-2*0.6-0.4, icon_w-2*0.6-0.4], center=true);
+      }
+      translate([-2,0]) {
+        square(size=[2.0, icon_w], center=true);
+      }
+    }
+    difference() {
+      square(size=[5.2, icon_w], center=true);
+      square(size=[5.2-2*0.4, icon_w-2*0.4], center=true);
+      translate([2.2,0]) {
+        square(size=[2.0, icon_w], center=true);
+      }
+    }
+    translate([-0.5,0]) {
+      circle(r=0.6);
+      translate([0.8, 0])
+        square(size=([1.6,0.4]), center=true);
+    }
+  }
 }
 
-linear_extrude(height=d2) {
+difference() {
+  linear_extrude(height=d1, convexity=10) {
+    difference() {
+      base2d();
+      for (i = [-1 : 2 : 1]) {
+        translate([0, i*(.5*w-thick-toll_r-.5*slit_w)]) {
+          square(size=[(i<0?l1:l2),slit_w], center=true);
+        }
+      }
+    }
+  }
+  if (with_icon) {
+    translate([0, 0, -1]) {
+      linear_extrude(height=0.2+1, convexity=10) {
+        lock_icon();
+      }
+    }
+  }
+}
+
+linear_extrude(height=d2, convexity=10) {
   difference() {
     base2d();
     offset(r = -thick) {
@@ -112,6 +170,8 @@ difference() {
   }
 }
 
-linear_extrude(height=d) {
-  circle(r=.5*pin_dia - toll_r);
+translate([0, 0, 0.2+1e-3]) {
+  linear_extrude(height=d-0.2, scale=pin_dia2/pin_dia, convexity=10) {
+    circle(r=.5*pin_dia - toll_r);
+  }
 }
