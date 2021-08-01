@@ -5,9 +5,9 @@ d = 5.0;
 pin_dia = 4.0;
 pin_dia2 = 2.4;
 
-d1 = 0.4;
-d2 = 0.8;
-d3 = 2.6;
+d1 = 0.4;   // Thickness of cover_inside, the pressable flexible cover
+d2 = 0.8;   // Thickness of cover above edge of button hole
+d3 = 2.6;   // Total height from button of hole (including d1)
 
 thick = 0.8;
 toll_r = 0.35;
@@ -20,6 +20,7 @@ slit_w = 0.25;
 icon_w = 4.5;
 
 with_icon=true;
+use_measured_base = false;
 
 $fa = 5;
 $fs = 0.1;
@@ -29,7 +30,7 @@ points_base = [ [-.5*l1, -.5*w], [-.5*l2, .5*w], [.5*l2, .5*w], [.5*l1, -.5*w]];
 function prev(i, L) = (i<=0 ? len(L)-1 : i-1);
 function next(i, L) = (i>=len(L)-1 ? 0 : i+1);
 
-module base2d() {
+module base2d_coords() {
   deltas = [[-1,-1], [-1, 1], [1, 1], [1, -1]];
   hull() {
     for (i = [0 : 1]) {
@@ -43,6 +44,20 @@ module base2d() {
         }
       }
     }
+  }
+}
+
+module base2d_measured() {
+  scale([1.059, 1.059*(7.3+0.2)/7.3]) {
+    import("carkey_button_outlines.svg", center=true);
+  }
+}
+
+module base2d() {
+  if (use_measured_base) {
+    base2d_measured();
+  } else {
+    base2d_coords();
   }
 }
 
@@ -163,3 +178,4 @@ module button_v1() {
 }
 
 button_v1();
+//insert_full();
