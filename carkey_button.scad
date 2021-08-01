@@ -2,6 +2,10 @@
 // _v2: Measured base2d outline drawn from scan of carkey.
 version = 2;
 
+//button = "lock";
+//button = "open";
+button = "trunk";
+
 l1 = 15.7-1.0;
 l2 = 16.2-1.0;
 w = 8.0;
@@ -53,8 +57,20 @@ module base2d_coords() {
 }
 
 module base2d_measured() {
-  scale([1.059*1.01, 1.059*(7.3+0.2)/7.3*1.02]) {
-    import("carkey_button_outlines.svg", center=true);
+  if (button == "lock") {
+    scale([1.059*1.01, 1.059*(7.3+0.2)/7.3*1.02]) {
+      import("carkey_button_outlines.svg", center=true);
+    }
+  }
+  if (button == "open") {
+    scale([1.059*1.02, 1.059*1.04]) {
+      import("carkey_button_outline_open.svg", center=true);
+    }
+  }
+  if (button == "trunk") {
+    scale([1.059*1.02, 1.059*1.04]) {
+      import("carkey_button_outline_trunk.svg", center=true);
+    }
   }
 }
 
