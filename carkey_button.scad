@@ -1,3 +1,7 @@
+// _v1: Coordinate-based base2d.
+// _v2: Measured base2d outline drawn from scan of carkey.
+version = 2;
+
 l1 = 15.7-1.0;
 l2 = 16.2-1.0;
 w = 8.0;
@@ -7,7 +11,7 @@ pin_dia2 = 2.4;
 
 d1 = 0.4;   // Thickness of cover_inside, the pressable flexible cover
 d2 = 0.8;   // Thickness of cover above edge of button hole
-d3 = 2.6;   // Total height from button of hole (including d1)
+d3 = [-1, 2.6, 3.2];   // Total height from button of hole (including d1)
 
 thick = 0.8;
 toll_r = 0.35;
@@ -16,11 +20,12 @@ corner_r = 1.5;
 cutout_r = 10;
 cutout_h = 10;
 cutout_d = d2 + 0.2;
+cover_inner_width = 4.7;
 slit_w = 0.25;
+slit_w_v2 = 0.75;
 icon_w = 4.5;
 
 with_icon=true;
-use_measured_base = false;
 
 $fa = 5;
 $fs = 0.1;
@@ -48,16 +53,17 @@ module base2d_coords() {
 }
 
 module base2d_measured() {
-  scale([1.059, 1.059*(7.3+0.2)/7.3]) {
+  scale([1.059*1.01, 1.059*(7.3+0.2)/7.3*1.02]) {
     import("carkey_button_outlines.svg", center=true);
   }
 }
 
 module base2d() {
-  if (use_measured_base) {
-    base2d_measured();
-  } else {
+  if (version == 1) {
     base2d_coords();
+  }
+  if (version == 2) {
+    base2d_measured();
   }
 }
 
@@ -122,6 +128,19 @@ module cover_inside() {
   }
 }
 
+module cover_inside_v2() {
+  linear_extrude(height=d1, convexity=10) {
+    difference() {
+      base2d();
+      for (i = [-1 : 2 : 1]) {
+        translate([0, i*(.5*cover_inner_width+.5*slit_w_v2)]) {
+          square(size=[l1+l2,slit_w_v2], center=true);
+        }
+      }
+    }
+  }
+}
+
 module cover_icon() {
   translate([0, 0, -1]) {
     linear_extrude(height=0.2+1, convexity=10) {
@@ -131,7 +150,7 @@ module cover_icon() {
 }
 
 module insert_full() {
-  linear_extrude(height=d3, convexity=10) {
+  linear_extrude(height=d3[version], convexity=10) {
     difference() {
       offset(r = -toll_r) {
         base2d();
@@ -177,5 +196,19 @@ module button_v1() {
   button_pin();
 }
 
-button_v1();
-//insert_full();
+module button_v2() {
+  cover_inside_v2();
+
+  cover_outside();
+
+  insert_full();
+
+  button_pin();
+}
+
+if (version == 1) {
+  button_v1();
+}
+if (version == 2) {
+  button_v2();
+}
